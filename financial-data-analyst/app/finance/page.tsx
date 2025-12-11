@@ -70,9 +70,9 @@ interface FileUpload {
 }
 
 const models: Model[] = [
-  { id: "claude-3-haiku-20240307", name: "Claude 3 Haiku" },
-  { id: "claude-haiku-4-5-20251001", name: "Claude 4.5 Haiku" },
-  { id: "claude-3-5-sonnet-20240620", name: "Claude 3.5 Sonnet" },
+  { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" },
+  { id: "gpt-4", name: "GPT-4" },
+  { id: "gpt-4-turbo-preview", name: "GPT-4 Turbo" },
 ];
 
 // Updated APIResponse interface
@@ -199,7 +199,7 @@ export default function AIChat() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState(
-    "claude-3-5-sonnet-20240620",
+    "gpt-4-turbo-preview",
   );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chartEndRef = useRef<HTMLDivElement>(null);
@@ -543,7 +543,7 @@ export default function AIChat() {
                         Financial Assistant
                       </CardTitle>
                       <CardDescription className="text-xs">
-                        Powered by Claude
+                        Powered by OpenAI
                       </CardDescription>
                     </div>
                   </>

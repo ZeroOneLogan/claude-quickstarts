@@ -1,11 +1,11 @@
 // app/api/finance/route.ts
 import { NextRequest } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import type { ChartData } from "@/types/chart";
 
-// Initialize Anthropic client with correct headers
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
 });
 
 export const runtime = "edge";
@@ -24,78 +24,71 @@ interface ChartToolResponse extends ChartData {
   // Any additional properties specific to the tool response
 }
 
-interface ToolSchema {
-  name: string;
-  description: string;
-  input_schema: {
-    type: "object";
-    properties: Record<string, unknown>;
-    required: string[];
-  };
-}
-
-const tools: ToolSchema[] = [
+const tools = [
   {
-    name: "generate_graph_data",
-    description:
-      "Generate structured JSON data for creating financial charts and graphs.",
-    input_schema: {
-      type: "object" as const,
-      properties: {
-        chartType: {
-          type: "string" as const,
-          enum: [
-            "bar",
-            "multiBar",
-            "line",
-            "pie",
-            "area",
-            "stackedArea",
-          ] as const,
-          description: "The type of chart to generate",
-        },
-        config: {
-          type: "object" as const,
-          properties: {
-            title: { type: "string" as const },
-            description: { type: "string" as const },
-            trend: {
-              type: "object" as const,
-              properties: {
-                percentage: { type: "number" as const },
-                direction: {
-                  type: "string" as const,
-                  enum: ["up", "down"] as const,
-                },
-              },
-              required: ["percentage", "direction"],
-            },
-            footer: { type: "string" as const },
-            totalLabel: { type: "string" as const },
-            xAxisKey: { type: "string" as const },
+    type: "function" as const,
+    function: {
+      name: "generate_graph_data",
+      description:
+        "Generate structured JSON data for creating financial charts and graphs.",
+      parameters: {
+        type: "object" as const,
+        properties: {
+          chartType: {
+            type: "string" as const,
+            enum: [
+              "bar",
+              "multiBar",
+              "line",
+              "pie",
+              "area",
+              "stackedArea",
+            ] as const,
+            description: "The type of chart to generate",
           },
-          required: ["title", "description"],
-        },
-        data: {
-          type: "array" as const,
-          items: {
-            type: "object" as const,
-            additionalProperties: true, // Allow any structure
-          },
-        },
-        chartConfig: {
-          type: "object" as const,
-          additionalProperties: {
+          config: {
             type: "object" as const,
             properties: {
-              label: { type: "string" as const },
-              stacked: { type: "boolean" as const },
+              title: { type: "string" as const },
+              description: { type: "string" as const },
+              trend: {
+                type: "object" as const,
+                properties: {
+                  percentage: { type: "number" as const },
+                  direction: {
+                    type: "string" as const,
+                    enum: ["up", "down"] as const,
+                  },
+                },
+                required: ["percentage", "direction"],
+              },
+              footer: { type: "string" as const },
+              totalLabel: { type: "string" as const },
+              xAxisKey: { type: "string" as const },
             },
-            required: ["label"],
+            required: ["title", "description"],
+          },
+          data: {
+            type: "array" as const,
+            items: {
+              type: "object" as const,
+              additionalProperties: true, // Allow any structure
+            },
+          },
+          chartConfig: {
+            type: "object" as const,
+            additionalProperties: {
+              type: "object" as const,
+              properties: {
+                label: { type: "string" as const },
+                stacked: { type: "boolean" as const },
+              },
+              required: ["label"],
+            },
           },
         },
+        required: ["chartType", "config", "data", "chartConfig"],
       },
-      required: ["chartType", "config", "data", "chartConfig"],
     },
   },
 ];
@@ -128,7 +121,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Convert all previous messages
-    let anthropicMessages = messages.map((msg: any) => ({
+    let openaiMessages = messages.map((msg: any) => ({
       role: msg.role,
       content: msg.content,
     }));
@@ -150,30 +143,19 @@ export async function POST(req: NextRequest) {
           const textContent = decodeURIComponent(escape(atob(base64)));
 
           // Replace only the last message with the file content
-          anthropicMessages[anthropicMessages.length - 1] = {
+          openaiMessages[openaiMessages.length - 1] = {
             role: "user",
-            content: [
-              {
-                type: "text",
-                text: `File contents of ${fileData.fileName}:\n\n${textContent}`,
-              },
-              {
-                type: "text",
-                text: messages[messages.length - 1].content,
-              },
-            ],
+            content: `File contents of ${fileData.fileName}:\n\n${textContent}\n\n${messages[messages.length - 1].content}`,
           };
         } else if (mediaType.startsWith("image/")) {
-          // Handle image files
-          anthropicMessages[anthropicMessages.length - 1] = {
+          // Handle image files - OpenAI format
+          openaiMessages[openaiMessages.length - 1] = {
             role: "user",
             content: [
               {
-                type: "image",
-                source: {
-                  type: "base64",
-                  media_type: mediaType,
-                  data: base64,
+                type: "image_url",
+                image_url: {
+                  url: `data:${mediaType};base64,${base64}`,
                 },
               },
               {
@@ -192,15 +174,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    console.log("🚀 Final Claude API Request:", {
-      endpoint: "messages.create",
+    console.log("🚀 Final OpenAI API Request:", {
+      endpoint: "chat.completions.create",
       model,
       max_tokens: 4096,
       temperature: 0.7,
-      messageCount: anthropicMessages.length,
-      tools: tools.map((t) => t.name),
+      messageCount: openaiMessages.length,
+      tools: tools.map((t) => t.function.name),
       messageStructure: JSON.stringify(
-        anthropicMessages.map((msg) => ({
+        openaiMessages.map((msg) => ({
           role: msg.role,
           content:
             typeof msg.content === "string"
@@ -212,14 +194,16 @@ export async function POST(req: NextRequest) {
       ),
     });
 
-    const response = await anthropic.messages.create({
+    const response = await openai.chat.completions.create({
       model,
       max_tokens: 4096,
       temperature: 0.7,
       tools: tools,
-      tool_choice: { type: "auto" },
-      messages: anthropicMessages,
-      system: `You are a financial data visualization expert. Your role is to analyze financial data and create clear, meaningful visualizations using generate_graph_data tool:
+      tool_choice: "auto",
+      messages: [
+        {
+          role: "system",
+          content: `You are a financial data visualization expert. Your role is to analyze financial data and create clear, meaningful visualizations using generate_graph_data tool:
 
 Here are the chart types available and their ideal use cases:
 
@@ -327,33 +311,29 @@ Never:
 - NEVER SAY you are using the generate_graph_data tool, just execute it when needed.
 
 Focus on clear financial insights and let the visualization enhance understanding.`,
+        },
+        ...openaiMessages,
+      ],
     });
 
-    console.log("✅ Claude API Response received:", {
+    console.log("✅ OpenAI API Response received:", {
       status: "success",
-      stopReason: response.stop_reason,
-      hasToolUse: response.content.some((c) => c.type === "tool_use"),
-      contentTypes: response.content.map((c) => c.type),
-      contentLength:
-        response.content[0].type === "text"
-          ? response.content[0].text.length
-          : 0,
-      toolOutput: response.content.find((c) => c.type === "tool_use")
-        ? JSON.stringify(
-            response.content.find((c) => c.type === "tool_use"),
-            null,
-            2,
-          )
+      finishReason: response.choices[0]?.finish_reason,
+      hasToolCalls: !!response.choices[0]?.message?.tool_calls,
+      contentTypes: response.choices[0]?.message?.tool_calls ? "tool_calls" : "text",
+      contentLength: response.choices[0]?.message?.content?.length || 0,
+      toolOutput: response.choices[0]?.message?.tool_calls
+        ? JSON.stringify(response.choices[0].message.tool_calls, null, 2)
         : "No tool used",
     });
 
-    const toolUseContent = response.content.find((c) => c.type === "tool_use");
-    const textContent = response.content.find((c) => c.type === "text");
+    const toolCalls = response.choices[0]?.message?.tool_calls;
+    const textContent = response.choices[0]?.message?.content;
 
-    const processToolResponse = (toolUseContent: any) => {
-      if (!toolUseContent) return null;
+    const processToolResponse = (toolCall: any) => {
+      if (!toolCall) return null;
 
-      const chartData = toolUseContent.input as ChartToolResponse;
+      const chartData = JSON.parse(toolCall.function.arguments) as ChartToolResponse;
 
       if (
         !chartData.chartType ||
@@ -401,15 +381,15 @@ Focus on clear financial insights and let the visualization enhance understandin
       };
     };
 
-    const processedChartData = toolUseContent
-      ? processToolResponse(toolUseContent)
+    const processedChartData = toolCalls && toolCalls.length > 0
+      ? processToolResponse(toolCalls[0])
       : null;
 
     return new Response(
       JSON.stringify({
-        content: textContent?.text || "",
-        hasToolUse: response.content.some((c) => c.type === "tool_use"),
-        toolUse: toolUseContent,
+        content: textContent || "",
+        hasToolUse: !!toolCalls && toolCalls.length > 0,
+        toolUse: toolCalls && toolCalls.length > 0 ? toolCalls[0] : null,
         chartData: processedChartData,
       }),
       {
@@ -430,24 +410,14 @@ Focus on clear financial insights and let the visualization enhance understandin
     });
 
     // Add specific error handling for different scenarios
-    if (error instanceof Anthropic.APIError) {
+    if ((error as any).status) {
       return new Response(
         JSON.stringify({
           error: "API Error",
-          details: error.message,
-          code: error.status,
+          details: error instanceof Error ? error.message : "Unknown error",
+          code: (error as any).status,
         }),
-        { status: error.status },
-      );
-    }
-
-    if (error instanceof Anthropic.AuthenticationError) {
-      return new Response(
-        JSON.stringify({
-          error: "Authentication Error",
-          details: "Invalid API key or authentication failed",
-        }),
-        { status: 401 },
+        { status: (error as any).status || 500 },
       );
     }
 
