@@ -1,17 +1,17 @@
-# Claude Financial Data Analyst
+# OpenAI Financial Data Analyst
 
 ![hero](public/hero.png)
 
-A sophisticated Next.js application that combines Claude's capabilities with interactive data visualization to analyze financial data via chat.
+A sophisticated Next.js application that combines OpenAI's capabilities with interactive data visualization to analyze financial data via chat.
 
 ## Features
 
-- **Intelligent Data Analysis**: Powered by Claude (Using Claude 3 Haiku & Claude 3.5 Sonnet)
+- **Intelligent Data Analysis**: Powered by OpenAI (Using GPT-3.5 Turbo & GPT-4)
 - **Multi-Format File Upload Support**:
   - Text/Code files (.txt, .md, .html, .py, .csv, etc)
   - PDF documents (Regular PDF with text, scanned documents not supported)
   - Images
-- **Interactive Data Visualization**: Based on the context and data analyzed, Claude can generate the following charts:
+- **Interactive Data Visualization**: Based on the context and data analyzed, OpenAI can generate the following charts:
   - Line Charts (Time series data & trends)
   - Bar Charts (Single metric comparisons)
   - Multi-Bar Charts (Multiple metrics comparison)
@@ -24,14 +24,14 @@ A sophisticated Next.js application that combines Claude's capabilities with int
 ### Prerequisites
 
 - Node.js 18+ installed
-- Claude API key (For Claude integration)
+- OpenAI API key (For OpenAI integration)
 
 ### Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/anthropics/anthropic-quickstarts.git
-cd anthropic-quickstarts/financial-data-analyst
+git clone https://github.com/ZeroOneLogan/codex-quickstarts.git
+cd codex-quickstarts/financial-data-analyst
 ```
 
 2. Install dependencies:
@@ -41,7 +41,7 @@ npm install
 
 3. Create a `.env.local` file in the root directory:
 ```env
-ANTHROPIC_API_KEY=your_api_key_here
+OPENAI_API_KEY=your_api_key_here
 ```
 
 4. Run the development server:
@@ -64,7 +64,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - **Backend**:
   - Next.js API Routes
   - Edge Runtime
-  - Anthropic SDK
+  - OpenAI SDK
 
 ## Usage Examples
 

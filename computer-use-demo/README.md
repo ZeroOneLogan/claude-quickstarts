@@ -1,47 +1,42 @@
-# Anthropic Computer Use Demo
+# OpenAI Computer Use Demo
 
 > [!NOTE]
-> Now featuring support for the new Claude 4 models! The latest Claude Opus 4.5 (claude-opus-4-5-20251101) is now available, along with Claude Sonnet 4.5 (claude-sonnet-4-5-20250929), Claude Sonnet 4 (claude-sonnet-4-20250514), Claude Opus 4 (claude-opus-4-20250514), and Claude Haiku 4.5 (claude-haiku-4-5-20251001). These models bring next-generation capabilities with the updated str_replace_based_edit_tool that replaces the previous str_replace_editor tool. The undo_edit command has been removed in this latest version for a more streamlined experience.
+> This demo has been adapted to use OpenAI's API. Note that OpenAI does not have native computer use capabilities like Anthropic's Claude, so this implementation provides a basic interface for automation tasks using OpenAI's GPT models.
 
 > [!CAUTION]
-> Computer use is a beta feature. Please be aware that computer use poses unique risks that are distinct from standard API features or chat interfaces. These risks are heightened when using computer use to interact with the internet. To minimize risks, consider taking precautions such as:
+> Computer automation poses unique risks that are distinct from standard API features or chat interfaces. These risks are heightened when using automation to interact with the internet. To minimize risks, consider taking precautions such as:
 >
 > 1. Use a dedicated virtual machine or container with minimal privileges to prevent direct system attacks or accidents.
 > 2. Avoid giving the model access to sensitive data, such as account login information, to prevent information theft.
 > 3. Limit internet access to an allowlist of domains to reduce exposure to malicious content.
 > 4. Ask a human to confirm decisions that may result in meaningful real-world consequences as well as any tasks requiring affirmative consent, such as accepting cookies, executing financial transactions, or agreeing to terms of service.
 >
-> In some circumstances, Claude will follow commands found in content even if it conflicts with the user's instructions. For example, instructions on webpages or contained in images may override user instructions or cause Claude to make mistakes. We suggest taking precautions to isolate Claude from sensitive data and actions to avoid risks related to prompt injection.
->
-> Finally, please inform end users of relevant risks and obtain their consent prior to enabling computer use in your own products.
+> Finally, please inform end users of relevant risks and obtain their consent prior to enabling computer automation in your own products.
 
-This repository helps you get started with computer use on Claude, with reference implementations of:
+This repository helps you get started with computer automation using OpenAI, with reference implementations of:
 
 - Build files to create a Docker container with all necessary dependencies
-- A computer use agent loop using the Claude API, Bedrock, or Vertex to access Claude Opus 4.5, Claude Sonnet 4.5, Claude Sonnet 4, Claude Opus 4, Claude Haiku 4.5, Claude 3.7 Sonnet, and Claude 3.5 Sonnet models
-- Anthropic-defined computer use tools
+- A computer automation agent loop using the OpenAI API to access GPT models
+- Computer automation tools
 - A streamlit app for interacting with the agent loop
 
-Please use [this form](https://forms.gle/BT1hpBrqDPDUrCqo7) to provide feedback on the quality of the model responses, the API itself, or the quality of the documentation - we cannot wait to hear from you!
+Please use feedback mechanisms to provide comments on the quality of the model responses, the API itself, or the quality of the documentation.
 
 > [!IMPORTANT]
-> The Beta API used in this reference implementation is subject to change. Please refer to the [API release notes](https://docs.claude.com/en/release-notes/api) for the most up-to-date information.
-
-> [!IMPORTANT]
-> The components are weakly separated: the agent loop runs in the container being controlled by Claude, can only be used by one session at a time, and must be restarted or reset between sessions if necessary.
+> The components are weakly separated: the agent loop runs in the container being controlled by the AI, can only be used by one session at a time, and must be restarted or reset between sessions if necessary.
 
 ## Quickstart: running the Docker container
 
-### Claude API
+### OpenAI API
 
 > [!TIP]
-> You can find your API key in the [Claude Console](https://console.anthropic.com/).
+> You can find your API key in the [OpenAI Console](https://platform.openai.com/api-keys).
 
 ```bash
-export ANTHROPIC_API_KEY=%your_api_key%
+export OPENAI_API_KEY=%your_api_key%
 docker run \
-    -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY \
-    -v $HOME/.anthropic:/home/computeruse/.anthropic \
+    -e OPENAI_API_KEY=$OPENAI_API_KEY \
+    -v $HOME/.openai:/home/computeruse/.openai \
     -p 5900:5900 \
     -p 8501:8501 \
     -p 6080:6080 \

@@ -1,11 +1,11 @@
-# Claude Customer Support Agent
+# OpenAI Customer Support Agent
 
-An advanced, fully customizable customer support chat interface powered by Claude and leveraging Amazon Bedrock Knowledge Bases for knowledge retrieval.
+An advanced, fully customizable customer support chat interface powered by OpenAI and leveraging Amazon Bedrock Knowledge Bases for knowledge retrieval.
 ![preview](tutorial/preview.png)
 
 ## Key Features
 
--  AI-powered chat using Anthropic's Claude model
+-  AI-powered chat using OpenAI's GPT models
 -  Amazon Bedrock integration for contextual knowledge retrieval
 -  Real-time thinking & debug information display
 -  Knowledge base source visualization
@@ -25,7 +25,7 @@ An advanced, fully customizable customer support chat interface powered by Claud
 Create a `.env.local` file in the root directory with the following variables:
 
 ```
-ANTHROPIC_API_KEY=your_anthropic_api_key
+OPENAI_API_KEY=your_openai_api_key
 BAWS_ACCESS_KEY_ID=your_aws_access_key
 BAWS_SECRET_ACCESS_KEY=your_aws_secret_key
 ```
@@ -34,11 +34,11 @@ Note: We are adding a 'B' in front of the AWS environment variables for a reason
 
 ##  How to Get Your Keys
 
-### Claude API Key
+### OpenAI API Key
 
-1. Visit [console.anthropic.com](https://console.anthropic.com/dashboard)
+1. Visit [platform.openai.com](https://platform.openai.com/api-keys)
 2. Sign up or log in to your account
-3. Click on "Get API keys"
+3. Click on "Create new secret key"
 4. Copy the key and paste it into your `.env.local` file
 
 ### AWS Access Key and Secret Key
@@ -110,14 +110,15 @@ To create your own knowledge base:
 
 ##  Switching Models
 
-This project supports multiple Claude models. To switch between models:
+This project supports multiple OpenAI models. To switch between models:
 
 1. In `ChatArea.tsx`, the `models` array defines available models:
 
 ```typescript
 const models: Model[] = [
-  { id: "claude-3-haiku-20240307", name: "Claude 3 Haiku" },
-  { id: "claude-3-5-sonnet-20240620", name: "Claude 3.5 Sonnet" },
+  { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" },
+  { id: "gpt-4", name: "GPT-4" },
+  { id: "gpt-4-turbo-preview", name: "GPT-4 Turbo" },
   // Add more models as needed
 ];
 ```
@@ -125,7 +126,7 @@ const models: Model[] = [
 2. The `selectedModel` state variable controls the currently selected model:
 
 ```typescript
-const [selectedModel, setSelectedModel] = useState("claude-3-haiku-20240307");
+const [selectedModel, setSelectedModel] = useState("gpt-3.5-turbo");
 ```
 
 3. To implement model switching in the UI, a dropdown component is used that updates the `selectedModel`.
@@ -176,7 +177,7 @@ To deploy this application using AWS Amplify, follow these steps:
        build:
          commands:
            - npm run build # Next.js build runs first
-           - echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY" >> .env
+           - echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env
            - echo "KNOWLEDGE_BASE_ID=$KNOWLEDGE_BASE_ID" >> .env
            - echo "BAWS_ACCESS_KEY_ID=$BAWS_ACCESS_KEY_ID" >> .env
            - echo "BAWS_SECRET_ACCESS_KEY=$BAWS_SECRET_ACCESS_KEY" >> .env
@@ -194,7 +195,7 @@ To deploy this application using AWS Amplify, follow these steps:
 7. Click on "Advanced settings" and add your environmental variables:
 
    ```
-   ANTHROPIC_API_KEY=your_anthropic_api_key
+   OPENAI_API_KEY=your_openai_api_key
    BAWS_ACCESS_KEY_ID=your_aws_access_key
    BAWS_SECRET_ACCESS_KEY=your_aws_secret_key
    ```

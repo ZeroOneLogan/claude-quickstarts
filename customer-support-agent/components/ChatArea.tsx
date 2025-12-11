@@ -302,7 +302,7 @@ function ChatArea() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showHeader, setShowHeader] = useState(false);
-  const [selectedModel, setSelectedModel] = useState("claude-haiku-4-5-20251001");
+  const [selectedModel, setSelectedModel] = useState("gpt-3.5-turbo");
   const [showAvatar, setShowAvatar] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -316,9 +316,9 @@ function ChatArea() {
   ];
 
   const models: Model[] = [
-    { id: "claude-3-haiku-20240307", name: "Claude 3 Haiku" },
-    { id: "claude-haiku-4-5-20251001", name: "Claude 4.5 Haiku" },
-    { id: "claude-3-5-sonnet-20240620", name: "Claude 3.5 Sonnet" },
+    { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" },
+    { id: "gpt-4", name: "GPT-4" },
+    { id: "gpt-4-turbo-preview", name: "GPT-4 Turbo" },
   ];
 
   const scrollToBottom = () => {
