@@ -156,4 +156,4 @@ Ensure `OPENAI_API_KEY` is exported in your shell environment.
 
 ## License
 
-Internal Anthropic use.
+MIT License
