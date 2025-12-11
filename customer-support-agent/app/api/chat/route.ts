@@ -1,11 +1,11 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { z } from "zod";
 import { retrieveContext, RAGSource } from "@/app/lib/utils";
 import crypto from "crypto";
 import customerSupportCategories from "@/app/lib/customer_support_categories.json";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 // Debug message helper function
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
     debugMessage("🚀 API route called", {
       messagesReceived: messages.length,
       latestMessageLength: latestMessage.length,
-      anthropicKeySlice: process.env.ANTHROPIC_API_KEY?.slice(0, 4) + "****",
+      openaiKeySlice: process.env.OPENAI_API_KEY?.slice(0, 4) + "****",
     }),
   ).slice(0, MAX_DEBUG_LENGTH);
 
@@ -132,7 +132,7 @@ export async function POST(req: Request) {
     : "";
 
   // Change the system prompt company for your use case
-  const systemPrompt = `You are acting as an Anthropic customer support assistant chatbot inside a chat window on a website. You are chatting with a human user who is asking for help about Anthropic's products and services. When responding to the user, aim to provide concise and helpful responses while maintaining a polite and professional tone.
+  const systemPrompt = `You are acting as an OpenAI customer support assistant chatbot inside a chat window on a website. You are chatting with a human user who is asking for help about OpenAI's products and services. When responding to the user, aim to provide concise and helpful responses while maintaining a polite and professional tone.
 
   To help you answer the user's question, we have retrieved the following information for you. It may or may not be relevant (we are using a RAG pipeline to retrieve this information):
   ${isRagWorking ? `${retrievedContext}` : "No information found for this query."}
@@ -141,7 +141,7 @@ export async function POST(req: Request) {
 
   ${categoriesContext}
 
-  If the question is unrelated to Anthropic's products and services, you should redirect the user to a human agent.
+  If the question is unrelated to OpenAI's products and services, you should redirect the user to a human agent.
 
   You are the first point of contact for the user and should try to resolve their issue or provide relevant information. If you are unable to help the user or if the user explicitly asks to talk to a human, you can redirect them to a human agent for further assistance.
   
@@ -211,34 +211,36 @@ export async function POST(req: Request) {
 
   try {
     console.log(`🚀 Query Processing`);
-    measureTime("Claude Generation Start");
+    measureTime("OpenAI Generation Start");
 
-    const anthropicMessages = messages.map((msg: any) => ({
+    const openaiMessages = messages.map((msg: any) => ({
       role: msg.role,
       content: msg.content,
     }));
 
-    anthropicMessages.push({
-      role: "assistant",
-      content: "{",
-    });
-
-    const response = await anthropic.messages.create({
+    const response = await openai.chat.completions.create({
       model: model,
       max_tokens: 1000,
-      messages: anthropicMessages,
-      system: systemPrompt,
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt
+        },
+        ...openaiMessages,
+        {
+          role: "user",
+          content: "Please respond with the JSON format specified."
+        }
+      ],
       temperature: 0.3,
+      response_format: { type: "json_object" }
     });
 
-    measureTime("Claude Generation Complete");
+    measureTime("OpenAI Generation Complete");
     console.log("✅ Message generation completed");
 
     // Extract text content from the response
-    const textContent = "{" + response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === "text")
-      .map((block) => block.text)
-      .join(" ");
+    const textContent = response.choices[0]?.message?.content || "{}";
 
     // Parse the JSON response
     let parsedResponse;
