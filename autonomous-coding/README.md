@@ -1,28 +1,24 @@
 # Autonomous Coding Agent Demo
 
-A minimal harness demonstrating long-running autonomous coding with the Claude Agent SDK. This demo implements a two-agent pattern (initializer + coding agent) that can build complete applications over multiple sessions.
+A minimal harness demonstrating long-running autonomous coding with OpenAI's API. This demo implements a two-agent pattern (initializer + coding agent) that can build complete applications over multiple sessions.
 
 ## Prerequisites
 
-**Required:** Install the latest versions of both Claude Code and the Claude Agent SDK:
+**Required:** Install the necessary tools and dependencies:
 
 ```bash
-# Install Claude Code CLI (latest version required)
-npm install -g @anthropic-ai/claude-code
-
 # Install Python dependencies
 pip install -r requirements.txt
 ```
 
 Verify your installations:
 ```bash
-claude --version  # Should be latest version
-pip show claude-code-sdk  # Check SDK is installed
+pip show openai  # Check OpenAI SDK is installed
 ```
 
-**API Key:** Set your Anthropic API key:
+**API Key:** Set your OpenAI API key:
 ```bash
-export ANTHROPIC_API_KEY='your-api-key-here'
+export OPENAI_API_KEY='your-api-key-here'
 ```
 
 ## Quick Start
@@ -131,7 +127,7 @@ The application will typically be available at `http://localhost:3000` or simila
 |--------|-------------|---------|
 | `--project-dir` | Directory for the project | `./autonomous_demo_project` |
 | `--max-iterations` | Max agent iterations | Unlimited |
-| `--model` | Claude model to use | `claude-sonnet-4-5-20250929` |
+| `--model` | OpenAI model to use | `gpt-4-turbo-preview` |
 
 ## Customization
 
@@ -156,7 +152,7 @@ This is normal. The initializer agent is generating 200 detailed test cases, whi
 The agent tried to run a command not in the allowlist. This is the security system working as intended. If needed, add the command to `ALLOWED_COMMANDS` in `security.py`.
 
 **"API key not set"**
-Ensure `ANTHROPIC_API_KEY` is exported in your shell environment.
+Ensure `OPENAI_API_KEY` is exported in your shell environment.
 
 ## License
 
